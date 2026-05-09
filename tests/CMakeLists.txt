@@ -6,13 +6,17 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(SDL2_image REQUIRED)
+
 add_executable(core_tests core_tests.cpp ../src/emulator_core.cpp)
 if(WIN32)
     target_link_libraries(core_tests 
         gtest_main 
         ${SDL2_LIBRARIES} 
-        SDL2_ttf 
-        SDL2_image 
+        ${SDL2_TTF_LIBRARIES}
+        ${SDL2_IMAGE_LIBRARIES}
         OpenSSL::SSL 
         OpenSSL::Crypto
     )
@@ -21,8 +25,8 @@ else()
         gtest_main 
         ${SDL2_LIBRARIES} 
         dl 
-        SDL2_ttf 
-        SDL2_image 
+        ${SDL2_TTF_LIBRARIES}
+        ${SDL2_IMAGE_LIBRARIES}
         OpenSSL::SSL 
         OpenSSL::Crypto 
         "-framework CoreFoundation" 
