@@ -1,0 +1,31 @@
+BasedOnStyle: LLVM
+Standard: Cpp20
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+# Пробелы
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Выравнивание
+AlignTrailingComments: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+
+# Разрывы строк
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
+
+# Порядок включений
+IncludeCategories:
+  - Regex: '^<.*\.h>'
+    Priority: 1
+  - Regex: '^".*\.h"'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+
+# Исключения для конкретных файлов (если нужно)

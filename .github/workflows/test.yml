@@ -1,0 +1,44 @@
+name: Aurora CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-rust:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Test Rust
+        run: cd aurora-ui/src-tauri && cargo test
+
+  test-cpp:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install sdl2 sdl2_ttf sdl2_image openssl
+      - name: Build and Run C++ Tests
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make core_tests
+          ./tests/core_tests
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: cd aurora-ui && npm install
+      - name: Run Tests
+        run: cd aurora-ui && npm test

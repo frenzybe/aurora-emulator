@@ -1,0 +1,99 @@
+:root {
+  /* --- COLOR PALETTE (HSL) --- */
+  --accent-h: 184;
+  --accent-s: 100%;
+  --accent-l: 50%;
+  
+  --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --accent-rgb: 0, 243, 255;
+  
+  --bg-base: #050505;
+  --bg-surface: #0a0a0a;
+  
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-dim: rgba(255, 255, 255, 0.3);
+  
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-highlight: rgba(255, 255, 255, 0.15);
+  
+  /* --- SURFACE TOKENS --- */
+  --surface-glass: rgba(255, 255, 255, 0.02);
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  
+  /* --- TYPOGRAPHY SCALE --- */
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  --fs-xxs: 0.6rem;    /* 9.6px - Ultra small labels */
+  --fs-xs: 0.7rem;     /* 11.2px - Secondary info */
+  --fs-sm: 0.85rem;    /* 13.6px - Main text */
+  --fs-base: 0.95rem;  /* 15.2px - Normal */
+  --fs-md: 1.1rem;     /* 17.6px - Subheadings */
+  --fs-lg: 1.4rem;     /* 22.4px - Section headers */
+  --fs-xl: 3.5rem;     /* 56px - Hero titles */
+  --fs-xxl: 8rem;      /* 128px - Background numbers */
+  
+  /* --- SPACING SCALE (8px Grid) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 44px;
+  --space-12: 52px;
+  --space-16: 72px;
+  
+  /* --- RADIUS --- */
+  --radius-sm: 6px;
+  --radius-md: 14px;
+  --radius-lg: 32px;
+  --radius-pill: 100px;
+  
+  /* --- EFFECTS --- */
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 12px 35px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.6);
+  --shadow-accent: 0 10px 40px rgba(0, 0, 0, 0.3);
+  
+  --glass-blur: blur(24px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.06);
+  
+  /* --- TRANSITIONS (Premium Curves) --- */
+  --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-spring: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Global Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  overflow: hidden;
+  user-select: none;
+}
+
+button {
+  font-family: var(--font-main);
+  border: none;
+  background: none;
+  outline: none;
+}
+
+input {
+  font-family: var(--font-main);
+}
