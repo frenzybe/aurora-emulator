@@ -31,25 +31,38 @@ add_executable(MegaDriveEmu ${SOURCES})
 
 find_package(OpenSSL REQUIRED)
 
+# Helper to link SDL2 components robustly
+macro(link_sdl2_component target component)
+    if(TARGET SDL2_${component}::SDL2_${component})
+        target_link_libraries(${target} PRIVATE SDL2_${component}::SDL2_${component})
+    elseif(SDL2_${component}_LIBRARIES)
+        target_link_libraries(${target} PRIVATE ${SDL2_${component}_LIBRARIES})
+    else()
+        target_link_libraries(${target} PRIVATE SDL2_${component})
+    endif()
+endmacro()
+
 if(WIN32)
     target_link_libraries(MegaDriveEmu 
+        PRIVATE
         ${SDL2_LIBRARIES} 
-        ${SDL2_TTF_LIBRARIES}
-        ${SDL2_IMAGE_LIBRARIES}
         OpenSSL::SSL 
         OpenSSL::Crypto
     )
+    link_sdl2_component(MegaDriveEmu ttf)
+    link_sdl2_component(MegaDriveEmu image)
 else()
     target_link_libraries(MegaDriveEmu 
+        PRIVATE
         ${SDL2_LIBRARIES} 
         dl 
-        ${SDL2_TTF_LIBRARIES}
-        ${SDL2_IMAGE_LIBRARIES}
         OpenSSL::SSL 
         OpenSSL::Crypto 
         "-framework CoreFoundation" 
         "-framework Security"
     )
+    link_sdl2_component(MegaDriveEmu ttf)
+    link_sdl2_component(MegaDriveEmu image)
 endif()
 
 add_subdirectory(tests)
