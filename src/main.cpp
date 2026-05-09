@@ -49,6 +49,10 @@ struct {
       int y = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
       int l = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
       int r = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+      int l2 = SDL_CONTROLLER_BUTTON_INVALID;
+      int r2 = SDL_CONTROLLER_BUTTON_INVALID;
+      int l3 = SDL_CONTROLLER_BUTTON_INVALID;
+      int r3 = SDL_CONTROLLER_BUTTON_INVALID;
       int select = SDL_CONTROLLER_BUTTON_BACK;
       int start = SDL_CONTROLLER_BUTTON_START;
     } gp;
@@ -308,6 +312,8 @@ int main(int argc, char *argv[]) {
     else if (arg == "--p1-gp-r" && i + 1 < argc) app_state.p1.gp.r = std::stoi(argv[++i]);
     else if (arg == "--p1-gp-l2" && i + 1 < argc) app_state.p1.gp.l2 = std::stoi(argv[++i]);
     else if (arg == "--p1-gp-r2" && i + 1 < argc) app_state.p1.gp.r2 = std::stoi(argv[++i]);
+    else if (arg == "--p1-gp-l3" && i + 1 < argc) app_state.p1.gp.l3 = std::stoi(argv[++i]);
+    else if (arg == "--p1-gp-r3" && i + 1 < argc) app_state.p1.gp.r3 = std::stoi(argv[++i]);
     else if (arg == "--p1-gp-select" && i + 1 < argc) app_state.p1.gp.select = std::stoi(argv[++i]);
     else if (arg == "--p1-gp-start" && i + 1 < argc) app_state.p1.gp.start = std::stoi(argv[++i]);
     else if (arg == "--p2-input" && i + 1 < argc) app_state.p2.input_mode = argv[++i];
@@ -324,6 +330,8 @@ int main(int argc, char *argv[]) {
     else if (arg == "--p2-gp-r" && i + 1 < argc) app_state.p2.gp.r = std::stoi(argv[++i]);
     else if (arg == "--p2-gp-l2" && i + 1 < argc) app_state.p2.gp.l2 = std::stoi(argv[++i]);
     else if (arg == "--p2-gp-r2" && i + 1 < argc) app_state.p2.gp.r2 = std::stoi(argv[++i]);
+    else if (arg == "--p2-gp-l3" && i + 1 < argc) app_state.p2.gp.l3 = std::stoi(argv[++i]);
+    else if (arg == "--p2-gp-r3" && i + 1 < argc) app_state.p2.gp.r3 = std::stoi(argv[++i]);
     else if (arg == "--p2-gp-select" && i + 1 < argc) app_state.p2.gp.select = std::stoi(argv[++i]);
     else if (arg == "--p2-gp-start" && i + 1 < argc) app_state.p2.gp.start = std::stoi(argv[++i]);
   }
