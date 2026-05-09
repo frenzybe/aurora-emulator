@@ -1,0 +1,9 @@
+[submodule "third_party/genplusgx"]
+	path = third_party/genplusgx
+	url = https://github.com/libretro/Genesis-Plus-GX.git
+[submodule "third_party/gen/Nuked-MD"]
+	path = third_party/gen/Nuked-MD
+	url = https://github.com/nukeykt/Nuked-MD.git
+[submodule "third_party/rcheevos"]
+	path = third_party/rcheevos
+	url = https://github.com/RetroAchievements/rcheevos.git
