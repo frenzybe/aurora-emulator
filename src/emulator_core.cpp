@@ -28,15 +28,27 @@ bool EmulatorCore::core_environment(unsigned cmd, void* data) {
 
 bool EmulatorCore::load_core(const std::string& library_path) {
     reset();
+#ifdef _WIN32
+    handle = (void*)LoadLibraryA(library_path.c_str());
+    if (!handle) {
+        std::cerr << "[Core-Error] Failed to load library " << library_path << " (Error code: " << GetLastError() << ")" << std::endl;
+        return false;
+    }
+#else
     handle = dlopen(library_path.c_str(), RTLD_NOW);
     if (!handle) {
         const char* err = dlerror();
         std::cerr << "[Core-Error] Failed to load library " << library_path << ": " << (err ? err : "Unknown error") << std::endl;
         return false;
     }
+#endif
 
     auto load_sym = [this](const char* name) -> void* {
+#ifdef _WIN32
+        void* sym = (void*)GetProcAddress((HMODULE)handle, name);
+#else
         void* sym = dlsym(handle, name);
+#endif
         if (!sym) std::cerr << "[Core-Warning] Missing required symbol: " << name << std::endl;
         return sym;
     };
@@ -133,7 +145,11 @@ void EmulatorCore::run() {
 void EmulatorCore::reset() {
     if (handle) {
         if (retro_deinit) retro_deinit();
+#ifdef _WIN32
+        FreeLibrary((HMODULE)handle);
+#else
         dlclose(handle);
+#endif
     }
     handle = nullptr;
     game_loaded = false;

@@ -4,6 +4,7 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <mutex>
 #include "rc_client.h"
 
 // Forward declarations

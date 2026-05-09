@@ -2,7 +2,11 @@
 #include <SDL.h>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <dlfcn.h>
+#endif
 #include "../third_party/genplusgx/libretro/libretro-common/include/libretro.h"
 
 class EmulatorCore {
