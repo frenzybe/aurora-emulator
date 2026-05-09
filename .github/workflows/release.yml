@@ -44,7 +44,7 @@ jobs:
           mkdir -p build
           cd build
           if [ "${{ matrix.platform }}" == "windows-latest" ]; then
-            cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+            cmake .. -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
           else
             cmake ..
           fi
