@@ -1,3 +1,11 @@
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
 #include "ra_integration.hpp"
 #include "emulator_core.hpp"
 #include "rc_hash.h"
@@ -22,8 +30,13 @@ static RA_Manager* g_ra_manager = nullptr;
 
 RA_Manager::RA_Manager() : rc(nullptr), active_core(nullptr) {
     g_ra_manager = this;
+#ifdef _WIN32
+    font_title = TTF_OpenFont("C:\\Windows\\Fonts\\arial.ttf", 20);
+    font_desc = TTF_OpenFont("C:\\Windows\\Fonts\\arial.ttf", 14);
+#else
     font_title = TTF_OpenFont("/System/Library/Fonts/Supplemental/Arial.ttf", 20);
     font_desc = TTF_OpenFont("/System/Library/Fonts/Supplemental/Arial.ttf", 14);
+#endif
     if (!font_title) {
         std::cout << "[RA] Failed to load font: " << TTF_GetError() << std::endl;
     }

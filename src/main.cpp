@@ -1,5 +1,13 @@
 #include "emulator_core.hpp"
 #include "ra_integration.hpp"
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
@@ -273,7 +281,7 @@ static size_t audio_refresh(const int16_t *data, size_t frames) {
   float vol_factor = app_state.volume / 100.0f;
   for (size_t i = 0; i < frames * 2; i++)
     buffered[i] = (int16_t)(data[i] * vol_factor);
-  SDL_QueueAudio(1, buffered.data(), frames * 2 * sizeof(int16_t));
+  SDL_QueueAudio(1, buffered.data(), (Uint32)(frames * 2 * sizeof(int16_t)));
   return frames;
 }
 
@@ -347,7 +355,8 @@ int main(int argc, char *argv[]) {
 
   std::cout << "[Player] Scanning for input devices..." << std::endl;
   for (int i = 0; i < SDL_NumJoysticks(); i++) {
-      std::cout << "  - Device " << i << ": " << (SDL_JoystickNameForIndex(i) ?: "Unknown") 
+      const char* name = SDL_JoystickNameForIndex(i);
+      std::cout << "  - Device " << i << ": " << (name ? name : "Unknown") 
                 << " [Controller: " << (SDL_IsGameController(i) ? "YES" : "NO") << "]" << std::endl;
   }
 
