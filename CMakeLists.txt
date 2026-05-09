@@ -29,15 +29,25 @@ add_executable(MegaDriveEmu ${SOURCES})
 
 find_package(OpenSSL REQUIRED)
 
-target_link_libraries(MegaDriveEmu 
-    ${SDL2_LIBRARIES} 
-    dl 
-    SDL2_ttf 
-    SDL2_image 
-    OpenSSL::SSL 
-    OpenSSL::Crypto 
-    "-framework CoreFoundation" 
-    "-framework Security"
-)
+if(WIN32)
+    target_link_libraries(MegaDriveEmu 
+        ${SDL2_LIBRARIES} 
+        SDL2_ttf 
+        SDL2_image 
+        OpenSSL::SSL 
+        OpenSSL::Crypto
+    )
+else()
+    target_link_libraries(MegaDriveEmu 
+        ${SDL2_LIBRARIES} 
+        dl 
+        SDL2_ttf 
+        SDL2_image 
+        OpenSSL::SSL 
+        OpenSSL::Crypto 
+        "-framework CoreFoundation" 
+        "-framework Security"
+    )
+endif()
 
 add_subdirectory(tests)
