@@ -60,6 +60,9 @@ jobs:
         if: matrix.os == 'windows'
         run: |
           vcpkg install sdl2:x64-windows-static sdl2-image:x64-windows-static sdl2-ttf:x64-windows-static openssl:x64-windows-static
+          echo "Listing vcpkg libs:"
+          ls -R $VCPKG_INSTALLATION_ROOT/installed/x64-windows-static/lib
+        shell: bash
 
       # 2. Build Emulator Core (C++)
       - name: Build Core

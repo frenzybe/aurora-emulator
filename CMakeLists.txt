@@ -15,10 +15,10 @@ find_package(OpenSSL REQUIRED)
 
 if(WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
-    # Search for static libs in vcpkg
-    find_library(SDL2_STATIC_LIB NAMES SDL2-static SDL2 SDL2d PATHS "C:/vcpkg/installed/x64-windows-static/lib")
-    find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf SDL2_ttfd PATHS "C:/vcpkg/installed/x64-windows-static/lib")
-    find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_imaged PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    # Search for static libs in vcpkg with more possible names
+    find_library(SDL2_STATIC_LIB NAMES SDL2-static libSDL2-static SDL2 SDL2d PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf libSDL2_ttf SDL2_ttf-static PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image libSDL2_image SDL2_image-static PATHS "C:/vcpkg/installed/x64-windows-static/lib")
     
     # Force absolute paths if finding failed (for GitHub)
     if(NOT SDL2_STATIC_LIB)
