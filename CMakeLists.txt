@@ -13,6 +13,7 @@ find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_image REQUIRED)
 
 if(WIN32)
+    add_definitions(-DSDL_MAIN_HANDLED)
     link_directories("C:/vcpkg/installed/x64-windows-static/lib")
 endif()
 
@@ -54,12 +55,12 @@ endmacro()
 if(WIN32)
     target_link_libraries(MegaDriveEmu 
         PRIVATE
-        ${SDL2_LIBRARIES}
-        ${SDL2_TTF_LIBRARIES}
-        ${SDL2_IMAGE_LIBRARIES}
+        SDL2-static.lib
+        SDL2_ttf.lib
+        SDL2_image.lib
         OpenSSL::SSL 
         OpenSSL::Crypto
-        imm32 setupapi version winmm
+        imm32 setupapi version winmm shell32 user32 gdi32 advapi32 ole32 oleaut32 uuid
     )
 else()
     target_link_libraries(MegaDriveEmu 
