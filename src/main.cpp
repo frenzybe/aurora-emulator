@@ -286,70 +286,83 @@ static size_t audio_refresh(const int16_t *data, size_t frames) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc < 2)
-    return 1;
-
-  std::string rom_path = argv[1];
+  std::string rom_path;
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
-    if (arg == "--shader" && i + 1 < argc) app_state.shader_mode = argv[++i];
-    else if (arg == "--volume" && i + 1 < argc) app_state.volume = std::clamp(std::stoi(argv[++i]), 0, 100);
-    else if (arg == "--core" && i + 1 < argc) app_state.core_path = argv[++i];
-    else if (arg == "--states-dir" && i + 1 < argc) app_state.states_dir = argv[++i];
-    else if (arg == "--ra-user" && i + 1 < argc) app_state.ra_user = argv[++i];
-    else if (arg == "--ra-token" && i + 1 < argc) app_state.ra_token = argv[++i];
-    else if (arg == "--p1-input" && i + 1 < argc) app_state.p1.input_mode = argv[++i];
-    else if (arg == "--p1-key-up" && i + 1 < argc) app_state.p1.up = std::stoi(argv[++i]);
-    else if (arg == "--p1-key-down" && i + 1 < argc) app_state.p1.down = std::stoi(argv[++i]);
-    else if (arg == "--p1-key-left" && i + 1 < argc) app_state.p1.left = std::stoi(argv[++i]);
-    else if (arg == "--p1-key-right" && i + 1 < argc) app_state.p1.right = std::stoi(argv[++i]);
-    else if (arg == "--p1-key-a" && i + 1 < argc) app_state.p1.a = std::stoi(argv[++i]);
-    else if (arg == "--p1-key-b" && i + 1 < argc) app_state.p1.b = std::stoi(argv[++i]);
-    else if (arg == "--p1-key-select" && i + 1 < argc) app_state.p1.select = std::stoi(argv[++i]);
-    else if (arg == "--p1-key-start" && i + 1 < argc) app_state.p1.start = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-up" && i + 1 < argc) app_state.p1.gp.up = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-down" && i + 1 < argc) app_state.p1.gp.down = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-left" && i + 1 < argc) app_state.p1.gp.left = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-right" && i + 1 < argc) app_state.p1.gp.right = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-a" && i + 1 < argc) app_state.p1.gp.a = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-b" && i + 1 < argc) app_state.p1.gp.b = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-c" && i + 1 < argc) app_state.p1.gp.c = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-x" && i + 1 < argc) app_state.p1.gp.x = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-y" && i + 1 < argc) app_state.p1.gp.y = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-l" && i + 1 < argc) app_state.p1.gp.l = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-r" && i + 1 < argc) app_state.p1.gp.r = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-l2" && i + 1 < argc) app_state.p1.gp.l2 = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-r2" && i + 1 < argc) app_state.p1.gp.r2 = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-l3" && i + 1 < argc) app_state.p1.gp.l3 = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-r3" && i + 1 < argc) app_state.p1.gp.r3 = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-select" && i + 1 < argc) app_state.p1.gp.select = std::stoi(argv[++i]);
-    else if (arg == "--p1-gp-start" && i + 1 < argc) app_state.p1.gp.start = std::stoi(argv[++i]);
-    else if (arg == "--p2-input" && i + 1 < argc) app_state.p2.input_mode = argv[++i];
-    else if (arg == "--p2-gp-up" && i + 1 < argc) app_state.p2.gp.up = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-down" && i + 1 < argc) app_state.p2.gp.down = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-left" && i + 1 < argc) app_state.p2.gp.left = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-right" && i + 1 < argc) app_state.p2.gp.right = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-a" && i + 1 < argc) app_state.p2.gp.a = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-b" && i + 1 < argc) app_state.p2.gp.b = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-c" && i + 1 < argc) app_state.p2.gp.c = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-x" && i + 1 < argc) app_state.p2.gp.x = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-y" && i + 1 < argc) app_state.p2.gp.y = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-l" && i + 1 < argc) app_state.p2.gp.l = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-r" && i + 1 < argc) app_state.p2.gp.r = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-l2" && i + 1 < argc) app_state.p2.gp.l2 = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-r2" && i + 1 < argc) app_state.p2.gp.r2 = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-l3" && i + 1 < argc) app_state.p2.gp.l3 = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-r3" && i + 1 < argc) app_state.p2.gp.r3 = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-select" && i + 1 < argc) app_state.p2.gp.select = std::stoi(argv[++i]);
-    else if (arg == "--p2-gp-start" && i + 1 < argc) app_state.p2.gp.start = std::stoi(argv[++i]);
+    
+    if (arg.find("--") == 0) {
+      // It's a flag, handle it and skip its value if it has one
+      if (i + 1 < argc) {
+        std::string val = argv[++i];
+        if (arg == "--shader") app_state.shader_mode = val;
+        else if (arg == "--volume") app_state.volume = std::clamp(std::stoi(val), 0, 100);
+        else if (arg == "--core") app_state.core_path = val;
+        else if (arg == "--states-dir") app_state.states_dir = val;
+        else if (arg == "--state") app_state.state_path = val;
+        else if (arg == "--ra-user") app_state.ra_user = val;
+        else if (arg == "--ra-token") app_state.ra_token = val;
+        else if (arg == "--p1-input") app_state.p1.input_mode = val;
+        else if (arg == "--p1-key-up") app_state.p1.up = std::stoi(val);
+        else if (arg == "--p1-key-down") app_state.p1.down = std::stoi(val);
+        else if (arg == "--p1-key-left") app_state.p1.left = std::stoi(val);
+        else if (arg == "--p1-key-right") app_state.p1.right = std::stoi(val);
+        else if (arg == "--p1-key-a") app_state.p1.a = std::stoi(val);
+        else if (arg == "--p1-key-b") app_state.p1.b = std::stoi(val);
+        else if (arg == "--p1-key-select") app_state.p1.select = std::stoi(val);
+        else if (arg == "--p1-key-start") app_state.p1.start = std::stoi(val);
+        else if (arg == "--p1-gp-up") app_state.p1.gp.up = std::stoi(val);
+        else if (arg == "--p1-gp-down") app_state.p1.gp.down = std::stoi(val);
+        else if (arg == "--p1-gp-left") app_state.p1.gp.left = std::stoi(val);
+        else if (arg == "--p1-gp-right") app_state.p1.gp.right = std::stoi(val);
+        else if (arg == "--p1-gp-a") app_state.p1.gp.a = std::stoi(val);
+        else if (arg == "--p1-gp-b") app_state.p1.gp.b = std::stoi(val);
+        else if (arg == "--p1-gp-x") app_state.p1.gp.x = std::stoi(val);
+        else if (arg == "--p1-gp-y") app_state.p1.gp.y = std::stoi(val);
+        else if (arg == "--p1-gp-l") app_state.p1.gp.l = std::stoi(val);
+        else if (arg == "--p1-gp-r") app_state.p1.gp.r = std::stoi(val);
+        else if (arg == "--p1-gp-select") app_state.p1.gp.select = std::stoi(val);
+        else if (arg == "--p1-gp-start") app_state.p1.gp.start = std::stoi(val);
+        else if (arg == "--p2-input") app_state.p2.input_mode = val;
+        else if (arg == "--p2-key-up") app_state.p2.up = std::stoi(val);
+        else if (arg == "--p2-key-down") app_state.p2.down = std::stoi(val);
+        else if (arg == "--p2-key-left") app_state.p2.left = std::stoi(val);
+        else if (arg == "--p2-key-right") app_state.p2.right = std::stoi(val);
+        else if (arg == "--p2-key-a") app_state.p2.a = std::stoi(val);
+        else if (arg == "--p2-key-b") app_state.p2.b = std::stoi(val);
+        else if (arg == "--p2-key-select") app_state.p2.select = std::stoi(val);
+        else if (arg == "--p2-key-start") app_state.p2.start = std::stoi(val);
+        else if (arg == "--p2-gp-up") app_state.p2.gp.up = std::stoi(val);
+        else if (arg == "--p2-gp-down") app_state.p2.gp.down = std::stoi(val);
+        else if (arg == "--p2-gp-left") app_state.p2.gp.left = std::stoi(val);
+        else if (arg == "--p2-gp-right") app_state.p2.gp.right = std::stoi(val);
+        else if (arg == "--p2-gp-a") app_state.p2.gp.a = std::stoi(val);
+        else if (arg == "--p2-gp-b") app_state.p2.gp.b = std::stoi(val);
+        else if (arg == "--p2-gp-select") app_state.p2.gp.select = std::stoi(val);
+        else if (arg == "--p2-gp-start") app_state.p2.gp.start = std::stoi(val);
+      }
+    } else {
+      // It's not a flag, so it must be the ROM path
+      rom_path = arg;
+    }
   }
+
+  if (rom_path.empty()) {
+    std::cerr << "[Core] Error: No ROM path specified!" << std::endl;
+    return 1;
+  }
+
+  std::cout << "[Core] Target ROM: " << rom_path << std::endl;
+  std::cout << "[Core] Target Core: " << app_state.core_path << std::endl;
 
   SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
   SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI, "1");
   SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4, "1");
   SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5, "1");
   
-  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0) {
+      std::cerr << "[Core] SDL_Init failed: " << SDL_GetError() << std::endl;
+      return 1;
+  }
   TTF_Init();
   IMG_Init(IMG_INIT_PNG);
 
@@ -361,13 +374,42 @@ int main(int argc, char *argv[]) {
   }
 
   window = SDL_CreateWindow("Aurora Player", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 960, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+  if (!window) {
+      std::cerr << "[Core] Window creation failed: " << SDL_GetError() << std::endl;
+      return 1;
+  }
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  if (!renderer) {
+      std::cerr << "[Core] Renderer creation failed: " << SDL_GetError() << std::endl;
+      return 1;
+  }
 
   core.set_video_cb(video_refresh);
   core.set_audio_cb(audio_refresh);
   core.set_input_cb(input_state_cb);
 
-  if (!core.load_core(app_state.core_path) || !core.load_game(rom_path)) return 1;
+  std::cout << "[Core] Loading core DLL..." << std::endl;
+  if (!core.load_core(app_state.core_path)) {
+      std::cerr << "[Core] Failed to load core DLL!" << std::endl;
+      return 1;
+  }
+  std::cout << "[Core] Core DLL loaded successfully." << std::endl;
+
+  std::cout << "[Core] Loading game ROM..." << std::endl;
+  if (!core.load_game(rom_path)) {
+      std::cerr << "[Core] Failed to load game ROM: " << rom_path << std::endl;
+      return 1;
+  }
+  std::cout << "[Core] Game loaded successfully." << std::endl;
+
+  if (!app_state.state_path.empty()) {
+    if (core.load_state(app_state.state_path)) {
+      std::cout << "[Core] Successfully loaded initial state: " << app_state.state_path << std::endl;
+      show_notification("STATE LOADED");
+    } else {
+      std::cerr << "[Core] Failed to load initial state: " << app_state.state_path << std::endl;
+    }
+  }
 
   if (!app_state.ra_user.empty() && !app_state.ra_token.empty()) {
     ra_manager = new RA_Manager();
@@ -387,9 +429,11 @@ int main(int argc, char *argv[]) {
       if (ev.type == SDL_KEYDOWN && ev.key.keysym.scancode == SDL_SCANCODE_ESCAPE) app_state.running = false;
     }
 
+    static bool save_pressed = false;
+    static bool load_pressed = false;
+
     // Process system commands and input
     for (int p_idx = 0; p_idx < 2; p_idx++) {
-        // Smart device acquisition in get_input will handle opening
         get_input(p_idx, 0); // Trigger auto-open
         
         bool select = false, start = false, l1 = false, r1 = false;
@@ -402,24 +446,35 @@ int main(int argc, char *argv[]) {
             auto &p = (p_idx == 0) ? app_state.p1 : app_state.p2;
             select = SDL_JoystickGetButton(joysticks[p_idx], p.gp.select);
             start = SDL_JoystickGetButton(joysticks[p_idx], p.gp.start);
-            // Fallback for L1/R1 on raw joysticks - use standard indices 4 and 5 if not mapped
             l1 = SDL_JoystickGetButton(joysticks[p_idx], 4); 
             r1 = SDL_JoystickGetButton(joysticks[p_idx], 5);
         }
 
         if (select && start) app_state.running = false;
+        
         if (select && r1) {
-            static bool save_pressed = false;
             if (!save_pressed && !app_state.states_dir.empty()) {
                 std::string timestamp = std::to_string(time(nullptr));
                 std::string path = app_state.states_dir + "/Slot_" + timestamp + ".state";
                 if (core.save_state(path)) {
                     screenshot_request_path = app_state.states_dir + "/Slot_" + timestamp + ".png";
+                    app_state.state_path = path; // UPDATE CURRENT STATE PATH FOR INSTANT ROLLBACK
                     show_notification("STATE SAVED");
                 }
                 save_pressed = true;
             }
-        } else { /* reset save_pressed logic here would need a per-player array if we wanted to be perfect */ }
+        } else if (select && l1) {
+            if (!load_pressed && !app_state.state_path.empty()) {
+                if (core.load_state(app_state.state_path)) {
+                    show_notification("STATE LOADED");
+                }
+                load_pressed = true;
+            }
+        } 
+        
+        // Reset press flags when buttons are released
+        if (!(select && r1)) save_pressed = false;
+        if (!(select && l1)) load_pressed = false;
     }
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -442,7 +497,49 @@ int main(int argc, char *argv[]) {
 
     if (ra_manager) ra_manager->render(renderer);
     if (osd_timer > 0) {
-        // ... (OSD render logic)
+        if (!osd_font) {
+            // Try to load a system font
+            const char* font_paths[] = {
+                "C:\\Windows\\Fonts\\arial.ttf",
+                "/Library/Fonts/Arial.ttf",
+                "/System/Library/Fonts/Supplemental/Arial.ttf",
+                "/System/Library/Fonts/Helvetica.ttc",
+                "/System/Library/Fonts/Geneva.ttf",
+                "/System/Library/Fonts/Menlo.ttc",
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+            };
+            for (const char* p : font_paths) {
+                osd_font = TTF_OpenFont(p, 24);
+                if (osd_font) {
+                    std::cout << "[Core] OSD Font loaded: " << p << std::endl;
+                    break;
+                }
+            }
+            if (!osd_font) {
+                std::cerr << "[Core] Warning: Failed to load any system font for OSD!" << std::endl;
+                osd_timer = 0; // Don't try again
+            }
+        }
+
+        if (osd_font) {
+            SDL_Color white = {255, 255, 255, 255};
+            SDL_Surface *surf = TTF_RenderText_Blended(osd_font, osd_text.c_str(), white);
+            if (surf) {
+                SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surf);
+                if (tex) {
+                    SDL_Rect rect = {20, 20, surf->w, surf->h};
+                    // Enable blending for the shadow/background
+                    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 160);
+                    SDL_Rect bg = {rect.x - 5, rect.y - 5, rect.w + 10, rect.h + 10};
+                    SDL_RenderFillRect(renderer, &bg);
+                    SDL_RenderCopy(renderer, tex, nullptr, &rect);
+                    SDL_DestroyTexture(tex);
+                }
+                SDL_FreeSurface(surf);
+            }
+        }
+        osd_timer--;
     }
     SDL_RenderPresent(renderer);
   }

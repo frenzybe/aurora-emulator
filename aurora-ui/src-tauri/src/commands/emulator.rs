@@ -89,8 +89,10 @@ pub async fn get_save_states<R: Runtime>(app: AppHandle<R>, rom_path: String) ->
             for entry in entries.flatten() {
                 let path = entry.path();
                 if path.extension().and_then(|s| s.to_str()) == Some("state") {
-                    let state_path_str = path.to_string_lossy().to_string();
+                    let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("unknown");
+                    let file_name_str = file_name.to_string();
                     let thumb_path = path.with_extension("png");
+                    let thumb_name = thumb_path.file_name().and_then(|s| s.to_str()).map(|s| s.to_string());
                     
                     let state_data = fs::read(&path).ok();
                     let screenshot_data = if thumb_path.exists() { fs::read(&thumb_path).ok() } else { None };
@@ -98,10 +100,9 @@ pub async fn get_save_states<R: Runtime>(app: AppHandle<R>, rom_path: String) ->
                     let metadata = fs::metadata(&path).map_err(|e| e.to_string())?;
                     let modified: DateTime<Local> = metadata.modified().unwrap().into();
                     let timestamp = modified.format("%Y-%m-%d %H:%M:%S").to_string();
-                    let file_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("0");
-                    let slot = file_name.split('_').last().unwrap_or("0").to_string();
+                    let slot = file_name.split('_').last().unwrap_or("0").replace(".state", "");
 
-                    // Insert or Update in DB
+                    // Insert or Update in DB using game_name + file_name as a unique key for platform-agnosticism
                     let _ = conn.execute(
                         "INSERT INTO save_states (game_path, state_path, thumb_path, state_data, screenshot, timestamp, slot) 
                          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
@@ -109,7 +110,7 @@ pub async fn get_save_states<R: Runtime>(app: AppHandle<R>, rom_path: String) ->
                             state_data = COALESCE(?4, state_data),
                             screenshot = COALESCE(?5, screenshot),
                             timestamp = ?6",
-                        rusqlite::params![rom_path, state_path_str, thumb_path.to_string_lossy().to_string(), state_data, screenshot_data, timestamp, slot],
+                        rusqlite::params![rom_path, file_name_str, thumb_name, state_data, screenshot_data, timestamp, slot],
                     );
                 }
             }
@@ -123,16 +124,23 @@ pub async fn get_save_states<R: Runtime>(app: AppHandle<R>, rom_path: String) ->
     ).map_err(|e| e.to_string())?;
 
     let rows = stmt.query_map(rusqlite::params![rom_path], |row| {
+        let file_name: String = row.get(0)?;
+        let thumb_name: Option<String> = row.get(1)?;
+        
+        // Reconstruct absolute paths for the frontend
+        let full_state_path = states_dir.join(&file_name).to_string_lossy().to_string();
+        let full_thumb_path = thumb_name.map(|n| states_dir.join(n).to_string_lossy().to_string());
+
         let screenshot_blob: Option<Vec<u8>> = row.get(2).ok();
         let mut screenshot_base64 = None;
         if let Some(data) = screenshot_blob {
             use base64::{Engine as _, engine::general_purpose};
             screenshot_base64 = Some(format!("data:image/png;base64,{}", general_purpose::STANDARD.encode(data)));
         }
-
+ 
         Ok(SaveStateInfo {
-            path: row.get(0)?,
-            thumbnail: row.get(1)?,
+            path: full_state_path,
+            thumbnail: full_thumb_path,
             screenshot: screenshot_base64,
             timestamp: row.get(3)?,
             slot: row.get(4)?,
@@ -151,27 +159,22 @@ pub async fn get_save_states<R: Runtime>(app: AppHandle<R>, rom_path: String) ->
 #[tauri::command]
 pub async fn delete_save_state<R: Runtime>(app: AppHandle<R>, state_path: String) -> Result<(), String> {
     let path = Path::new(&state_path);
-    if !path.exists() {
-        return Err("Save state file not found".to_string());
+    
+    // 1. Delete physical files (state and thumbnail)
+    if path.exists() {
+        fs::remove_file(path).map_err(|e| e.to_string())?;
     }
 
-    // Delete state file
-    fs::remove_file(path).map_err(|e| e.to_string())?;
-
-    // Delete thumbnail
     let thumb_path = path.with_extension("png");
     if thumb_path.exists() {
         let _ = fs::remove_file(thumb_path);
-    } else {
-        let old_thumb = path.with_extension("state.png");
-        if old_thumb.exists() {
-            let _ = fs::remove_file(old_thumb);
-        }
     }
 
-    // Delete from DB
+    // 2. Delete from DB using the FILENAME (since that's what we store now)
+    let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or(&state_path);
     let conn = get_db_conn(&app)?;
-    conn.execute("DELETE FROM save_states WHERE state_path = ?1", rusqlite::params![state_path])
+    
+    conn.execute("DELETE FROM save_states WHERE state_path = ?1", rusqlite::params![file_name])
         .map_err(|e| e.to_string())?;
 
     Ok(())
@@ -193,6 +196,7 @@ pub async fn play_game<R: Runtime>(
     ra_token: Option<String>,
     state_path: Option<String>,
 ) -> Result<(), String> {
+    println!("[Launcher] play_game called with state_path: {:?}", state_path);
     println!("[Launcher] Starting game: {}", rom_path);
     
     // Update play stats in DB
@@ -245,14 +249,13 @@ pub async fn play_game<R: Runtime>(
     if let Ok(mut stmt) = conn.prepare("SELECT state_path, state_data, screenshot FROM save_states WHERE game_path = ?1") {
         if let Ok(mut rows) = stmt.query(rusqlite::params![rom_path]) {
             while let Ok(Some(row)) = rows.next() {
-                let sp: String = row.get(0).unwrap_or_default();
+                let file_name: String = row.get(0).unwrap_or_default();
                 let sd: Option<Vec<u8>> = row.get(1).ok();
                 let sb: Option<Vec<u8>> = row.get(2).ok();
                 
                 if let Some(data) = sd {
-                    let path = Path::new(&sp);
-                    if let Some(parent) = path.parent() { let _ = fs::create_dir_all(parent); }
-                    let _ = fs::write(path, data);
+                    let path = states_dir.join(&file_name);
+                    let _ = fs::write(&path, data);
                     
                     if let Some(thumb) = sb {
                         let tp = path.with_extension("png");
@@ -280,6 +283,11 @@ pub async fn play_game<R: Runtime>(
             args.push(path);
         }
     }
+
+    // ... (Keyboard mapping adds here)
+    
+    // MOVE LOG TO THE END OF ARG BUILDING (before extending with inputs)
+    // Actually, let's put it right before command execution.
 
     // Add P1 Keyboard
     args.extend(vec!["--p1-key-up".to_string(), p1_controls.up.to_string()]);
