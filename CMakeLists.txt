@@ -30,6 +30,11 @@ if(WIN32)
     if(NOT SDL2_IMAGE_STATIC_LIB)
         set(SDL2_IMAGE_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_image.lib")
     endif()
+else()
+    # Search for shared libs on Mac (Homebrew)
+    find_library(SDL2_LIB NAMES SDL2 PATHS "/opt/homebrew/lib" "/usr/local/lib")
+    find_library(SDL2_TTF_LIB NAMES SDL2_ttf PATHS "/opt/homebrew/lib" "/usr/local/lib")
+    find_library(SDL2_IMAGE_LIB NAMES SDL2_image PATHS "/opt/homebrew/lib" "/usr/local/lib")
 endif()
 
 include_directories(
@@ -66,7 +71,9 @@ if(WIN32)
 else()
     target_link_libraries(MegaDriveEmu 
         PRIVATE
-        ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
+        ${SDL2_LIB}
+        ${SDL2_TTF_LIB}
+        ${SDL2_IMAGE_LIB}
         OpenSSL::SSL OpenSSL::Crypto
         dl "-framework CoreFoundation" "-framework Security"
     )
