@@ -8,9 +8,14 @@ project(AuroraPlayer)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(SDL2_image REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL2_ttf CONFIG REQUIRED)
+find_package(SDL2_image CONFIG REQUIRED)
+
+# Use targets if available, otherwise fallback to variables
+if(TARGET SDL2::SDL2)
+    set(SDL2_LIBRARIES SDL2::SDL2)
+endif()
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} /opt/homebrew/include /usr/local/include)
 include_directories(/opt/homebrew/include/SDL2 /usr/local/include/SDL2)
@@ -40,8 +45,8 @@ find_package(OpenSSL REQUIRED)
 macro(link_sdl2_component target component)
     if(TARGET SDL2_${component}::SDL2_${component})
         target_link_libraries(${target} PRIVATE SDL2_${component}::SDL2_${component})
-    elseif(SDL2_${component}_LIBRARIES)
-        target_link_libraries(${target} PRIVATE ${SDL2_${component}_LIBRARIES})
+    elseif(TARGET SDL2::SDL2_${component})
+        target_link_libraries(${target} PRIVATE SDL2::SDL2_${component})
     else()
         target_link_libraries(${target} PRIVATE SDL2_${component})
     endif()
@@ -53,6 +58,7 @@ if(WIN32)
         ${SDL2_LIBRARIES} 
         OpenSSL::SSL 
         OpenSSL::Crypto
+        imm32 setupapi version winmm # System libs required for static SDL2
     )
     link_sdl2_component(MegaDriveEmu ttf)
     link_sdl2_component(MegaDriveEmu image)
