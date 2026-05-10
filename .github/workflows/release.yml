@@ -1,8 +1,7 @@
-name: Release
+name: Build and Release
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -12,72 +11,81 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, windows-latest]
+        include:
+          - platform: macos-latest
+            os: macos
+            arch: aarch64
+            triple: aarch64-apple-darwin
+          - platform: macos-latest
+            os: macos
+            arch: x86_64
+            triple: x86_64-apple-darwin
+          - platform: windows-latest
+            os: windows
+            arch: x86_64
+            triple: x86_64-pc-windows-msvc
 
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
+      # 1. Install Dependencies
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos'
+        run: |
+          brew install sdl2 sdl2_image sdl2_ttf openssl cmake
+      
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows'
+        run: |
+          vcpkg install sdl2 sdl2-image sdl2-ttf openssl:x64-windows
+
+      # 2. Build Emulator Core (C++)
+      - name: Build Core
+        run: |
+          mkdir build
+          cd build
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            cmake .. -A x64 -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+            cmake --build . --config Release
+          else
+            cmake .. -DCMAKE_BUILD_TYPE=Release
+            make -j$(sysctl -n hw.ncpu)
+          fi
+        shell: bash
+
+      # 3. Setup Tauri Sidecar
+      - name: Setup Sidecar
+        run: |
+          mkdir -p aurora-ui/src-tauri/binaries
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            cp build/Release/MegaDriveEmu.exe aurora-ui/src-tauri/binaries/MegaDriveEmu-${{ matrix.triple }}.exe
+          else
+            cp build/MegaDriveEmu aurora-ui/src-tauri/binaries/MegaDriveEmu-${{ matrix.triple }}
+          fi
+        shell: bash
+
+      # 4. Build Tauri App
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: lts/*
 
-      - name: install Rust
+      - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install dependencies (macOS)
-        if: matrix.platform == 'macos-latest'
-        run: brew install sdl2 sdl2_ttf sdl2_image
-
-      - name: Install dependencies (Windows)
-        if: matrix.platform == 'windows-latest'
-        run: |
-          vcpkg install sdl2:x64-windows sdl2-ttf:x64-windows sdl2-image:x64-windows
-          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
-
-      - name: Build Emulator (C++)
-        shell: bash
-        run: |
-          mkdir -p build
-          cd build
-          if [ "${{ matrix.platform }}" == "windows-latest" ]; then
-            cmake .. -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
-          else
-            cmake ..
-          fi
-          cmake --build . --config Release
-          
-      - name: Prepare Sidecars
-        shell: bash
-        run: |
-          if [ "${{ matrix.platform }}" == "macos-latest" ]; then
-            TRIPLE="aarch64-apple-darwin"
-            EXT=""
-            SRC="build/MegaDriveEmu"
-          else
-            TRIPLE="x86_64-pc-windows-msvc"
-            EXT=".exe"
-            SRC="build/Release/MegaDriveEmu.exe"
-          fi
-          
-          mkdir -p aurora-ui/src-tauri/binaries
-          cp $SRC aurora-ui/src-tauri/binaries/MegaDriveEmu-${TRIPLE}${EXT}
-
-      - name: Install Frontend Deps
+      - name: install app dependencies and build
         run: |
           cd aurora-ui
           npm install
+          npm run tauri build
 
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 5. Upload Artifacts
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          projectPath: aurora-ui
-          tagName: aurora-v__VERSION__
-          releaseName: "Aurora v__VERSION__"
-          releaseBody: "Automated cross-platform build for macOS and Windows."
-          releaseDraft: true
-          prerelease: false
+          name: aurora-${{ matrix.triple }}
+          path: |
+            aurora-ui/src-tauri/target/release/bundle/dmg/*.dmg
+            aurora-ui/src-tauri/target/release/bundle/msi/*.msi
+            aurora-ui/src-tauri/target/release/bundle/nsis/*.exe
