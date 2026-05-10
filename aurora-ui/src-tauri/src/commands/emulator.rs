@@ -539,18 +539,37 @@ pub async fn download_cores<R: Runtime>(app: AppHandle<R>) -> Result<(), String>
         status: "Scanning Libretro Buildbot...".to_string(),
     });
 
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .build()
+        .map_err(|e| e.to_string())?;
+        
     let index_html = client.get(&base_url).send().await.map_err(|e| e.to_string())?.text().await.map_err(|e| e.to_string())?;
     
-    // Simple regex-like parsing of hrefs for .zip files
+    // Improved parsing: search for anything inside href="..." that ends with .zip
     let mut core_links = Vec::new();
+    
+    // Look for both "href=" and "HREF=" and handle different quote types
     for line in index_html.lines() {
-        if line.contains(".zip") && line.contains("href=\"") {
-            if let Some(start) = line.find("href=\"") {
-                let rest = &line[start + 6..];
-                if let Some(end) = rest.find("\"") {
-                    let link = &rest[..end];
+        let line_lower = line.to_lowercase();
+        if line_lower.contains(".zip") {
+            // Find all occurrences of href="..." in the line
+            let parts: Vec<&str> = line.split("href=\"").collect();
+            for part in parts.iter().skip(1) {
+                if let Some(end) = part.find("\"") {
+                    let link = &part[..end];
                     if link.ends_with(".zip") {
+                        core_links.push(link.to_string());
+                    }
+                }
+            }
+            
+            // Also try single quotes if double quotes failed for this part
+            let parts_single: Vec<&str> = line.split("href='").collect();
+            for part in parts_single.iter().skip(1) {
+                if let Some(end) = part.find("'") {
+                    let link = &part[..end];
+                    if link.ends_with(".zip") && !core_links.contains(&link.to_string()) {
                         core_links.push(link.to_string());
                     }
                 }
