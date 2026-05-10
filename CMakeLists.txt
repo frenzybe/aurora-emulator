@@ -38,6 +38,7 @@ include_directories(
     third_party/rcheevos/include
     third_party/genplusgx/libretro/libretro-common/include
     /opt/homebrew/include /usr/local/include
+    /opt/homebrew/include/SDL2 /usr/local/include/SDL2
 )
 
 add_definitions(-DRC_CLIENT_SUPPORTS_HASH=1)
