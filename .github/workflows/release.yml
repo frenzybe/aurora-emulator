@@ -31,7 +31,26 @@ jobs:
         with:
           submodules: recursive
 
-      # 1. Install Dependencies
+      # 1. Caching
+      - name: Cache Cargo dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: aurora-ui/src-tauri
+
+      - name: Cache vcpkg
+        if: matrix.os == 'windows'
+        uses: actions/cache@v4
+        with:
+          path: $VCPKG_INSTALLATION_ROOT/installed
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('CMakeLists.txt') }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: aurora-ui/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('aurora-ui/package-lock.json') }}
+
+      # 2. Install Dependencies
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos'
         run: |
@@ -51,7 +70,7 @@ jobs:
             cmake .. -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
             cmake --build . --config Release
           else
-            cmake .. -DCMAKE_BUILD_TYPE=Release
+            cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR=$(brew --prefix openssl)
             make -j$(sysctl -n hw.ncpu)
           fi
         shell: bash

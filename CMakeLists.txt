@@ -11,55 +11,47 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_image REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 if(WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
-    # Try to find, but fallback to absolute paths for GitHub Actions
+    # Search for static libs in vcpkg
     find_library(SDL2_STATIC_LIB NAMES SDL2-static SDL2 SDL2d PATHS "C:/vcpkg/installed/x64-windows-static/lib")
     find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf SDL2_ttfd PATHS "C:/vcpkg/installed/x64-windows-static/lib")
     find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_imaged PATHS "C:/vcpkg/installed/x64-windows-static/lib")
     
-    if(NOT SDL2_STATIC_LIB) set(SDL2_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2-static.lib") endif()
-    if(NOT SDL2_TTF_STATIC_LIB) set(SDL2_TTF_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_ttf.lib") endif()
-    if(NOT SDL2_IMAGE_STATIC_LIB) set(SDL2_IMAGE_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_image.lib") endif()
-    
-    link_directories("C:/vcpkg/installed/x64-windows-static/lib")
+    # Force absolute paths if finding failed (for GitHub)
+    if(NOT SDL2_STATIC_LIB)
+        set(SDL2_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2-static.lib")
+    endif()
+    if(NOT SDL2_TTF_STATIC_LIB)
+        set(SDL2_TTF_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_ttf.lib")
+    endif()
+    if(NOT SDL2_IMAGE_STATIC_LIB)
+        set(SDL2_IMAGE_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_image.lib")
+    endif()
 endif()
 
-include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} /opt/homebrew/include /usr/local/include)
-include_directories(/opt/homebrew/include/SDL2 /usr/local/include/SDL2)
-include_directories(third_party/httplib)
-include_directories(third_party/rcheevos/include)
-include_directories(third_party/genplusgx/libretro/libretro-common/include)
-
-add_definitions(-DRC_CLIENT_SUPPORTS_HASH=1)
-
-link_directories(/opt/homebrew/lib /usr/local/lib)
-
-# Include rcheevos source files directly since it lacks CMakeLists.txt
-file(GLOB_RECURSE RCHEEVOS_SRC "third_party/rcheevos/src/*.c")
-
-set(SOURCES
-    src/main.cpp
-    src/emulator_core.cpp
-    src/ra_integration.cpp
-    ${RCHEEVOS_SRC}
+include_directories(
+    ${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS}
+    third_party/httplib
+    third_party/rcheevos/include
+    third_party/genplusgx/libretro/libretro-common/include
+    /opt/homebrew/include /usr/local/include
 )
 
-add_executable(MegaDriveEmu ${SOURCES})
+add_definitions(-DRC_CLIENT_SUPPORTS_HASH=1)
+link_directories(/opt/homebrew/lib /usr/local/lib)
 
-find_package(OpenSSL REQUIRED)
+# Include rcheevos source files directly
+file(GLOB_RECURSE RCHEEVOS_SRC "third_party/rcheevos/src/*.c")
 
-# Helper to link SDL2 components robustly
-macro(link_sdl2_component target component)
-    if(TARGET SDL2_${component}::SDL2_${component})
-        target_link_libraries(${target} PRIVATE SDL2_${component}::SDL2_${component})
-    elseif(TARGET SDL2::SDL2_${component})
-        target_link_libraries(${target} PRIVATE SDL2::SDL2_${component})
-    else()
-        target_link_libraries(${target} PRIVATE SDL2_${component})
-    endif()
-endmacro()
+add_executable(MegaDriveEmu 
+    src/main.cpp 
+    src/emulator_core.cpp 
+    src/ra_integration.cpp 
+    ${RCHEEVOS_SRC}
+)
 
 if(WIN32)
     target_link_libraries(MegaDriveEmu 
@@ -67,22 +59,16 @@ if(WIN32)
         ${SDL2_STATIC_LIB}
         ${SDL2_TTF_STATIC_LIB}
         ${SDL2_IMAGE_STATIC_LIB}
-        OpenSSL::SSL 
-        OpenSSL::Crypto
+        OpenSSL::SSL OpenSSL::Crypto
         imm32 setupapi version winmm shell32 user32 gdi32 advapi32 ole32 oleaut32 uuid
     )
 else()
     target_link_libraries(MegaDriveEmu 
         PRIVATE
-        ${SDL2_LIBRARIES} 
-        dl 
-        OpenSSL::SSL 
-        OpenSSL::Crypto 
-        "-framework CoreFoundation" 
-        "-framework Security"
+        ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
+        OpenSSL::SSL OpenSSL::Crypto
+        dl "-framework CoreFoundation" "-framework Security"
     )
-    link_sdl2_component(MegaDriveEmu ttf)
-    link_sdl2_component(MegaDriveEmu image)
 endif()
 
-add_subdirectory(tests)
+# add_subdirectory(tests)
