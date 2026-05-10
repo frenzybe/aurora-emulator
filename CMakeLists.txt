@@ -14,7 +14,9 @@ find_package(SDL2_image REQUIRED)
 
 if(WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
-    link_directories("C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(SDL2_STATIC_LIB NAMES SDL2-static SDL2 PATHS "C:/vcpkg/installed/x64-windows-static/lib" REQUIRED)
+    find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf SDL2_ttfs PATHS "C:/vcpkg/installed/x64-windows-static/lib" REQUIRED)
+    find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_images PATHS "C:/vcpkg/installed/x64-windows-static/lib" REQUIRED)
 endif()
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} /opt/homebrew/include /usr/local/include)
@@ -55,9 +57,9 @@ endmacro()
 if(WIN32)
     target_link_libraries(MegaDriveEmu 
         PRIVATE
-        SDL2-static.lib
-        SDL2_ttf.lib
-        SDL2_image.lib
+        ${SDL2_STATIC_LIB}
+        ${SDL2_TTF_STATIC_LIB}
+        ${SDL2_IMAGE_STATIC_LIB}
         OpenSSL::SSL 
         OpenSSL::Crypto
         imm32 setupapi version winmm shell32 user32 gdi32 advapi32 ole32 oleaut32 uuid

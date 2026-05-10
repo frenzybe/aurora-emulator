@@ -15,9 +15,9 @@ if(WIN32)
     target_link_libraries(core_tests 
         PRIVATE
         gtest_main 
-        SDL2-static.lib
-        SDL2_ttf.lib
-        SDL2_image.lib
+        ${SDL2_STATIC_LIB}
+        ${SDL2_TTF_STATIC_LIB}
+        ${SDL2_IMAGE_STATIC_LIB}
         OpenSSL::SSL 
         OpenSSL::Crypto
         imm32 setupapi version winmm shell32 user32 gdi32 advapi32 ole32 oleaut32 uuid
