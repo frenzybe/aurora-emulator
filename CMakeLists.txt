@@ -28,8 +28,16 @@ if(WIN32)
         set(SDL2_TTF_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_ttf.lib")
     endif()
     if(NOT SDL2_IMAGE_STATIC_LIB)
-        set(SDL2_IMAGE_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_image.lib")
+        set(SDL2_IMAGE_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_image-static.lib")
     endif()
+
+    # Transitive dependencies for static linking
+    find_library(FREETYPE_LIB NAMES freetype PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(PNG_LIB NAMES libpng16 libpng PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(ZLIB_LIB NAMES zlib zs PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(BZ2_LIB NAMES bz2 PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(BROTLI_COMMON_LIB NAMES brotlicommon PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(BROTLI_DEC_LIB NAMES brotlidec PATHS "C:/vcpkg/installed/x64-windows-static/lib")
 else()
     # Search for shared libs on Mac (Homebrew)
     find_library(SDL2_LIB NAMES SDL2 PATHS "/opt/homebrew/lib" "/usr/local/lib")
@@ -65,6 +73,12 @@ if(WIN32)
         ${SDL2_STATIC_LIB}
         ${SDL2_TTF_STATIC_LIB}
         ${SDL2_IMAGE_STATIC_LIB}
+        ${FREETYPE_LIB}
+        ${PNG_LIB}
+        ${ZLIB_LIB}
+        ${BZ2_LIB}
+        ${BROTLI_COMMON_LIB}
+        ${BROTLI_DEC_LIB}
         OpenSSL::SSL OpenSSL::Crypto
         imm32 setupapi version winmm shell32 user32 gdi32 advapi32 ole32 oleaut32 uuid
     )
