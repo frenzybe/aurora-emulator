@@ -14,20 +14,15 @@ find_package(SDL2_image REQUIRED)
 
 if(WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
+    # Try to find, but fallback to absolute paths for GitHub Actions
     find_library(SDL2_STATIC_LIB NAMES SDL2-static SDL2 SDL2d PATHS "C:/vcpkg/installed/x64-windows-static/lib")
-    find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf SDL2_ttfd SDL2_ttfs PATHS "C:/vcpkg/installed/x64-windows-static/lib")
-    find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_imaged SDL2_images PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf SDL2_ttfd PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_imaged PATHS "C:/vcpkg/installed/x64-windows-static/lib")
     
-    # Fallback if find_library failed but find_package succeeded
-    if(NOT SDL2_STATIC_LIB)
-        set(SDL2_STATIC_LIB SDL2-static)
-    endif()
-    if(NOT SDL2_TTF_STATIC_LIB)
-        set(SDL2_TTF_STATIC_LIB SDL2_ttf)
-    endif()
-    if(NOT SDL2_IMAGE_STATIC_LIB)
-        set(SDL2_IMAGE_STATIC_LIB SDL2_image)
-    endif()
+    if(NOT SDL2_STATIC_LIB) set(SDL2_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2-static.lib") endif()
+    if(NOT SDL2_TTF_STATIC_LIB) set(SDL2_TTF_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_ttf.lib") endif()
+    if(NOT SDL2_IMAGE_STATIC_LIB) set(SDL2_IMAGE_STATIC_LIB "C:/vcpkg/installed/x64-windows-static/lib/SDL2_image.lib") endif()
+    
     link_directories("C:/vcpkg/installed/x64-windows-static/lib")
 endif()
 
