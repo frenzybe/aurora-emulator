@@ -14,9 +14,15 @@ find_package(SDL2_image REQUIRED)
 
 if(WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
-    find_library(SDL2_STATIC_LIB NAMES SDL2-static SDL2 PATHS "C:/vcpkg/installed/x64-windows-static/lib" REQUIRED)
-    find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf SDL2_ttfs PATHS "C:/vcpkg/installed/x64-windows-static/lib" REQUIRED)
-    find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_images PATHS "C:/vcpkg/installed/x64-windows-static/lib" REQUIRED)
+    find_library(SDL2_STATIC_LIB NAMES SDL2-static SDL2 SDL2d PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(SDL2_TTF_STATIC_LIB NAMES SDL2_ttf SDL2_ttfd SDL2_ttfs PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_imaged SDL2_images PATHS "C:/vcpkg/installed/x64-windows-static/lib")
+    
+    # Fallback if find_library failed but find_package succeeded
+    if(NOT SDL2_STATIC_LIB) set(SDL2_STATIC_LIB SDL2-static) endif()
+    if(NOT SDL2_TTF_STATIC_LIB) set(SDL2_TTF_STATIC_LIB SDL2_ttf) endif()
+    if(NOT SDL2_IMAGE_STATIC_LIB) set(SDL2_IMAGE_STATIC_LIB SDL2_image) endif()
+    link_directories("C:/vcpkg/installed/x64-windows-static/lib")
 endif()
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} /opt/homebrew/include /usr/local/include)
