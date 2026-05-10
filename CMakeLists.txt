@@ -55,13 +55,13 @@ endmacro()
 if(WIN32)
     target_link_libraries(MegaDriveEmu 
         PRIVATE
-        ${SDL2_LIBRARIES} 
+        SDL2::SDL2
+        SDL2_ttf::SDL2_ttf
+        SDL2_image::SDL2_image
         OpenSSL::SSL 
         OpenSSL::Crypto
         imm32 setupapi version winmm # System libs required for static SDL2
     )
-    link_sdl2_component(MegaDriveEmu ttf)
-    link_sdl2_component(MegaDriveEmu image)
 else()
     target_link_libraries(MegaDriveEmu 
         PRIVATE

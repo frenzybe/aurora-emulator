@@ -15,12 +15,13 @@ if(WIN32)
     target_link_libraries(core_tests 
         PRIVATE
         gtest_main 
-        ${SDL2_LIBRARIES} 
+        SDL2::SDL2
+        SDL2_ttf::SDL2_ttf
+        SDL2_image::SDL2_image
         OpenSSL::SSL 
         OpenSSL::Crypto
+        imm32 setupapi version winmm
     )
-    link_sdl2_component(core_tests ttf)
-    link_sdl2_component(core_tests image)
 else()
     target_link_libraries(core_tests 
         PRIVATE
