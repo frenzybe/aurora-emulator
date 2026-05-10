@@ -19,9 +19,15 @@ if(WIN32)
     find_library(SDL2_IMAGE_STATIC_LIB NAMES SDL2_image SDL2_imaged SDL2_images PATHS "C:/vcpkg/installed/x64-windows-static/lib")
     
     # Fallback if find_library failed but find_package succeeded
-    if(NOT SDL2_STATIC_LIB) set(SDL2_STATIC_LIB SDL2-static) endif()
-    if(NOT SDL2_TTF_STATIC_LIB) set(SDL2_TTF_STATIC_LIB SDL2_ttf) endif()
-    if(NOT SDL2_IMAGE_STATIC_LIB) set(SDL2_IMAGE_STATIC_LIB SDL2_image) endif()
+    if(NOT SDL2_STATIC_LIB)
+        set(SDL2_STATIC_LIB SDL2-static)
+    endif()
+    if(NOT SDL2_TTF_STATIC_LIB)
+        set(SDL2_TTF_STATIC_LIB SDL2_ttf)
+    endif()
+    if(NOT SDL2_IMAGE_STATIC_LIB)
+        set(SDL2_IMAGE_STATIC_LIB SDL2_image)
+    endif()
     link_directories("C:/vcpkg/installed/x64-windows-static/lib")
 endif()
 
