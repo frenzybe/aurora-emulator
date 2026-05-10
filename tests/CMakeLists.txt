@@ -15,9 +15,9 @@ if(WIN32)
     target_link_libraries(core_tests 
         PRIVATE
         gtest_main 
-        SDL2::SDL2
-        SDL2_ttf::SDL2_ttf
-        SDL2_image::SDL2_image
+        ${SDL2_LIBRARIES}
+        ${SDL2_TTF_LIBRARIES}
+        ${SDL2_IMAGE_LIBRARIES}
         OpenSSL::SSL 
         OpenSSL::Crypto
         imm32 setupapi version winmm

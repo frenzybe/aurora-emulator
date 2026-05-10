@@ -8,13 +8,12 @@ project(AuroraPlayer)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(SDL2 CONFIG REQUIRED)
-find_package(SDL2_ttf CONFIG REQUIRED)
-find_package(SDL2_image CONFIG REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(SDL2_image REQUIRED)
 
-# Use targets if available, otherwise fallback to variables
-if(TARGET SDL2::SDL2)
-    set(SDL2_LIBRARIES SDL2::SDL2)
+if(WIN32)
+    link_directories("C:/vcpkg/installed/x64-windows-static/lib")
 endif()
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} /opt/homebrew/include /usr/local/include)
@@ -55,12 +54,12 @@ endmacro()
 if(WIN32)
     target_link_libraries(MegaDriveEmu 
         PRIVATE
-        SDL2::SDL2
-        SDL2_ttf::SDL2_ttf
-        SDL2_image::SDL2_image
+        ${SDL2_LIBRARIES}
+        ${SDL2_TTF_LIBRARIES}
+        ${SDL2_IMAGE_LIBRARIES}
         OpenSSL::SSL 
         OpenSSL::Crypto
-        imm32 setupapi version winmm # System libs required for static SDL2
+        imm32 setupapi version winmm
     )
 else()
     target_link_libraries(MegaDriveEmu 
